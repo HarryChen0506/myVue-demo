@@ -4,20 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>实现一个简易版本的vue</title>
+    <title>实现一个简易版本的mvvm框架</title>
 </head>
 <script src="js/mvvm.js"></script>
 <body>
     <div id="app">
-        <div>演示</div>
-        <div>{{demo}}</div>
-        <div>{{someStr}}</div>
+        <div v-class="'red'">演示</div>
+        <div v-noclass="'blue'">{{demo}}</div>
+        <div o-if="true">{{someStr}}</div>
         <div>{{someObj.name}}</div>
         <div>
             <button v-on:click="clickBtn">点击</button>
         </div>
-    </div>   
-
+    </div>  
 <script>
 
     //入口 实例化一个Mvvm对象
@@ -31,7 +30,7 @@
         methods: {
             clickBtn: function(){
                 console.log('点击事件');
-                this.demo = '点击事件啦'
+                this.demo = '点击事件啦';
             }
         }
     });

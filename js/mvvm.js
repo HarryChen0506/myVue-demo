@@ -27,14 +27,14 @@ Mvvm.prototype = {
                 //  console.log(123);
                 // var val = self._data[key];
                 // console.log(456);
-                console.log('proxy_get:'+self._data[key]);
+                // console.log('proxy_get:'+self._data[key]);
                 return self._data[key];
             },
             set: function (newVal){
                 if(newVal === self._data[key]){
                     return 
                 }
-                 console.log('proxy_set--'+'val:'+self._data[key]+'--newVal:'+newVal);
+                //  console.log('proxy_set--'+'val:'+self._data[key]+'--newVal:'+newVal);
                  self._data[key] = newVal; 
             }
         })
@@ -70,7 +70,7 @@ Observer.prototype = {
             enumerable: true, // 可枚举
             configurable: false, // 不能再define
             get: function (){
-                console.log('get:'+val);
+                // console.log('get:'+val);
                 return val;
             },
             set: function (newVal){
@@ -118,11 +118,11 @@ Compile.prototype = {
         [].slice.call(fragment.childNodes).forEach(function (node){
             var text = node.textContent;
             if(self.isTextNode(node) && reg.test(text)){
-                //文本节点                
-                console.log('text:'+node.textContent);
-                console.log(RegExp.$1);
-                console.log(RegExp.$2);
-                self.compileText(node);
+                //文本节点  
+                var exp = RegExp.$1;             
+                // console.log('text:'+node.textContent);
+                // console.log(RegExp.$1);                
+                self.compileText(node,exp);
             }else if(self.isElementNode(node)){
                 //元素节点
                 console.log('node:'+node.nodeName+node.textContent);
@@ -136,16 +136,65 @@ Compile.prototype = {
 
         })
     },
-    compileText: function (text){
-
+    compileText: function (node,exp){
+        Compile.Util.text(node,this.$vm,exp);
     },
     compileNode: function (node){
-
+        var self = this;
+        var attrs = node.attributes;
+        [].forEach.call(attrs,function(item,index){
+           //item.name  指令名称
+           //item.value 指令的值
+           var attrName = item.name;
+           var dirName = attrName.slice(2);
+           if(self.isDir(attrName,dirName)){
+               //是指令名称
+               console.log(item.name,item.value);
+               console.log('是指令')
+           }else{
+               console.log(item.name,item.value);
+               console.log('不是指令')
+           }
+           
+        })
+        console.log(attrs);
+        
     },
     isElementNode: function (node){        
         return node.nodeType && node.nodeType == 1       
     },
     isTextNode: function (node){
         return node.nodeType && node.nodeType == 3       
+    },
+    isDir: function (attrName,dirName){              
+        return attrName.indexOf('v-') ==0
+    }
+}
+Compile.Util = {
+    text: function(node, vm, exp) {
+        this.bind(node, vm, exp, 'text');
+    },
+    bind: function(node, vm, exp, dir){
+        var self = this;
+        // console.log('bind')
+        // console.log('node',node)
+        // console.log('vm',vm)
+        // console.log('exp',exp)
+        // console.log('dir',dir)
+        var updaterFn = Compile.updater[dir+'Updater'];
+        updaterFn && updaterFn(node,self._getVmValue(vm,exp));
+    },
+    _getVmValue: function (vm,exp){
+        console.log(exp);
+        var val = vm;
+        exp.split('.').forEach(function(item){
+            val = val[item]
+        })
+        return val;
+    }
+}
+Compile.updater = {
+    textUpdater: function (node,val){
+        node.textContent = typeof val =='undefined'?'':val;
     }
 }
