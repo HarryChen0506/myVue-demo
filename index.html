@@ -9,10 +9,15 @@
 <script src="js/mvvm.js"></script>
 <body>
     <div id="app">
-        <div v-class="'red'">演示</div>
-        <div v-noclass="'blue'">{{demo}}</div>
-        <div o-if="true">{{someStr}}</div>
-        <div>{{someObj.name}}</div>
+        <!--<div v-class="'red'">演示</div>-->
+        <div v-noclass="'blue'">
+            {{demo}}
+            <div> 第二个  
+                 {{demo}}
+            </div>
+        </div>
+        <!--<div o-if="true">{{someStr}}</div>
+        <div>{{someObj.name}}</div>-->
         <div>
             <button v-on:click="clickBtn">点击</button>
         </div>
@@ -29,8 +34,8 @@
         },
         methods: {
             clickBtn: function(){
-                console.log('点击事件');
-                this.demo = '点击事件啦';
+                console.log('点击事件');                
+                this.demo = '点击事件啦lalal';
             }
         }
     });

@@ -143,21 +143,23 @@ Compile.prototype = {
         var self = this;
         var attrs = node.attributes;
         [].forEach.call(attrs,function(item,index){
-           //item.name  指令名称
-           //item.value 指令的值
-           var attrName = item.name;
-           var dirName = attrName.slice(2);
-           if(self.isDir(attrName,dirName)){
-               //是指令名称
-               console.log(item.name,item.value);
-               console.log('是指令')
-           }else{
-               console.log(item.name,item.value);
-               console.log('不是指令')
-           }
+             //item.name  指令名称
+            //item.value 指令的值
+            var attrName = item.name;
+            var dirName = attrName.slice(2);
+            var exp = item.value;           
+            if(self.isDirective(attrName,dirName)){
+               
+                // 指令是事件
+                if(self.isEventDirective(dirName)){
+                    Compile.Util.eventHandler(node,self.$vm,dirName,exp);
+                }else{
+                //指令是普通属性
+                    
+                }
+            }
            
         })
-        console.log(attrs);
         
     },
     isElementNode: function (node){        
@@ -166,13 +168,27 @@ Compile.prototype = {
     isTextNode: function (node){
         return node.nodeType && node.nodeType == 3       
     },
-    isDir: function (attrName,dirName){              
+    isDirective: function (attrName,dirName){              
         return attrName.indexOf('v-') ==0
+    },
+    isEventDirective: function (dirName){
+        return dirName.indexOf('on') ==0
     }
 }
 Compile.Util = {
     text: function(node, vm, exp) {
         this.bind(node, vm, exp, 'text');
+    },
+    eventHandler: function (node,vm,dirName,exp){
+        //注册事件
+        var eventType = dirName.split(':')[1];
+        // console.log('事件名',eventType);
+        // console.log('表达式',exp);
+        //事件主体
+        var eventFn = vm.$opts.methods && vm.$opts.methods[exp];
+        if( eventType && eventFn){
+             node.addEventListener(eventType,eventFn.bind(vm),false);
+        }       
     },
     bind: function(node, vm, exp, dir){
         var self = this;
