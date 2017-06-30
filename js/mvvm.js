@@ -41,6 +41,8 @@ Mvvm.prototype = {
     }
 }
 
+//watcher 订约器
+
 
 
 //observe 函数
@@ -125,7 +127,7 @@ Compile.prototype = {
                 self.compileText(node,exp);
             }else if(self.isElementNode(node)){
                 //元素节点
-                console.log('node:'+node.nodeName+node.textContent);
+                // console.log('node:'+node.nodeName+node.textContent);
                 self.compileNode(node);
             }
             //递归 如果node有子节点 继续compile
@@ -155,7 +157,7 @@ Compile.prototype = {
                     Compile.Util.eventHandler(node,self.$vm,dirName,exp);
                 }else{
                 //指令是普通属性
-                    
+                    Compile.Util[dirName] && Compile.Util[dirName](node,self.$vm,dirName,exp);
                 }
             }
            
@@ -190,6 +192,30 @@ Compile.Util = {
              node.addEventListener(eventType,eventFn.bind(vm),false);
         }       
     },
+    class: function (node,vm,dirName,exp){
+        this.bind(node,vm,exp,'class');
+    },
+    html: function (node,vm,dirName,exp){
+        this.bind(node,vm,exp,'html');
+    },
+    if: function (node,vm,dirName,exp){
+        this.bind(node,vm,exp,'if')
+    },
+    model:function (node,vm,dirName,exp){
+        var self = this;
+        // 双向绑定
+        this.bind(node,vm,exp,'model');
+       
+        // var val = this._getVmValue(vm,exp);
+        // node.value = val;
+
+        //input 事件
+        var eventFn = function (e){
+            var newVal = e.target.value;
+            self._setVmValue(vm,exp,newVal);
+        }
+        node.addEventListener('input',eventFn,false)
+    },
     bind: function(node, vm, exp, dir){
         var self = this;
         // console.log('bind')
@@ -207,10 +233,40 @@ Compile.Util = {
             val = val[item]
         })
         return val;
+    },
+    _setVmValue: function (vm,exp,newVal){
+        var val = vm;
+        exp.split('.').forEach(function(item,index,arr){
+            //不是最后一个键值
+            if(index < arr.length-1){
+                val = val[item]
+            }else{
+            //对象最后一个键值，直接赋值
+                val[item] = newVal;
+            }            
+        })       
     }
 }
 Compile.updater = {
     textUpdater: function (node,val){
         node.textContent = typeof val =='undefined'?'':val;
+    },
+    classUpdater: function (node,val){
+        var oldClass = node.className;
+        space = oldClass && String(val) ? ' ':'';
+        node.className = oldClass + space + val;
+    },
+    htmlUpdater: function (node,val){
+        node.innerHTML = typeof val =='undefined' ? '':val;
+    },
+    ifUpdater: function (node,val){
+        if(!val){
+            node.parentNode.removeChild(node);
+        }
+    },
+    modelUpdater: function (node,val){
+        node.value = val
     }
 }
+
+

@@ -9,15 +9,13 @@
 <script src="js/mvvm.js"></script>
 <body>
     <div id="app">
-        <!--<div v-class="'red'">演示</div>-->
-        <div v-noclass="'blue'">
-            {{demo}}
-            <div> 第二个  
-                 {{demo}}
-            </div>
-        </div>
-        <!--<div o-if="true">{{someStr}}</div>
-        <div>{{someObj.name}}</div>-->
+        <div class="blue yellow" v-class="demo">演示</div>
+        <div v-html="bla"></div>
+        <div>{{someObj.name}}</div>
+        <input type="text" v-model="someObj.name">
+        <div v-if="show">显示</div>
+        <div v-if="noshow">隐藏</div>
+        <div>{{someObj.name}}</div>
         <div>
             <button v-on:click="clickBtn">点击</button>
         </div>
@@ -30,7 +28,10 @@
         data: {
             demo: 'hello',
             someStr: 123,
-            someObj:{name:'harry'}
+            someObj:{name:'harry'},
+            bla: '<p>这是一段文字</p>',
+            show: true,
+            noshow: false
         },
         methods: {
             clickBtn: function(){
