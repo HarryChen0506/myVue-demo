@@ -41,8 +41,84 @@ Mvvm.prototype = {
     }
 }
 
-//watcher 订约器
+//watcher 订阅器
+//订阅器包含订阅者 watcher和订阅器Dep
 
+//订阅器
+var uid = 0;
+function Dep(){
+    this.id = uid++;
+    this.subs = [];
+}
+Dep.prototype = {
+    depend: function() {
+        Dep.target.addDep(this);
+    },
+    addSub: function(watcher){
+        this.subs.push(watcher);
+    },
+    notify: function(){
+        this.subs.forEach(function (item){
+            var self = this;
+            item.update();
+        })
+    }
+}
+Dep.target = null;
+
+function Watch(vm,expOrFn,cb){
+    this.$vm = vm;
+    this.$cb = cb;
+    this.depIds = {};
+    if(typeof expOrFn == 'function'){
+        this.getter = expOrFn;
+    }else if(typeof expOrFn == 'string'){
+        this.getter = this.parseGetter(expOrFn);
+    }
+
+    this.value = this.get();
+
+}
+Watch.prototype = {
+    addDep: function (dep){
+        //添加订阅器
+        if (!this.depIds.hasOwnProperty(dep.id)) {
+            dep.addSub(this);
+            this.depIds[dep.id] = dep;
+        }
+    },
+    update: function (){
+         // 重新compile
+        this.run();
+    },
+    run: function (){
+        var value = this.get();
+        var oldVal = this.value;
+        if (value !== oldVal) {
+            this.value = value;
+            this.$cb.call(this.$vm, value, oldVal);
+        } 
+    },
+    get: function (){
+        Dep.target = this;
+        // var value = this.getter.call(this.$vm,this.$vm);
+        var value = this.getter(this.$vm);
+        Dep.target = null;
+        return value;
+    },
+    parseGetter: function (exp){
+        //返回一个函数  参数exp 是指令
+         if (/[^\w.$]/.test(exp)) return; 
+        var expArr = exp.split('.');
+        return function (vm){
+            for(var i=0; i<expArr.length;i++){
+                if (typeof vm == 'undefined') return;
+                vm = vm[expArr[i]];
+            }
+            return vm
+        }
+    }
+}
 
 
 //observe 函数
@@ -68,11 +144,17 @@ Observer.prototype = {
         var self = this;
         //若val是对象，则递归进行监听
         var childObj = observe(val);
+        // 初始化订阅器
+        var dep = new Dep();
+
         Object.defineProperty(data,key,{
             enumerable: true, // 可枚举
             configurable: false, // 不能再define
             get: function (){
                 // console.log('get:'+val);
+                if(Dep.target) {
+                    dep.depend();
+                }
                 return val;
             },
             set: function (newVal){
@@ -83,6 +165,9 @@ Observer.prototype = {
                  val = newVal;
                  //若新值是对象，则继续监听
                  childObj = observe(newVal); 
+
+                 //更新订阅者
+                 dep.notify();
             }
         })
     }
@@ -130,8 +215,8 @@ Compile.prototype = {
                 // console.log('node:'+node.nodeName+node.textContent);
                 self.compileNode(node);
             }
+            
             //递归 如果node有子节点 继续compile
-
             if(node.childNodes && node.childNodes.length ){
                 self.compileElemnt(node);
             }
@@ -150,8 +235,7 @@ Compile.prototype = {
             var attrName = item.name;
             var dirName = attrName.slice(2);
             var exp = item.value;           
-            if(self.isDirective(attrName,dirName)){
-               
+            if(self.isDirective(attrName,dirName)){               
                 // 指令是事件
                 if(self.isEventDirective(dirName)){
                     Compile.Util.eventHandler(node,self.$vm,dirName,exp);
@@ -159,9 +243,10 @@ Compile.prototype = {
                 //指令是普通属性
                     Compile.Util[dirName] && Compile.Util[dirName](node,self.$vm,dirName,exp);
                 }
-            }
-           
+               
+            }           
         })
+       
         
     },
     isElementNode: function (node){        
@@ -225,6 +310,12 @@ Compile.Util = {
         // console.log('dir',dir)
         var updaterFn = Compile.updater[dir+'Updater'];
         updaterFn && updaterFn(node,self._getVmValue(vm,exp));
+
+         //new Watch 添加订阅者
+        var watcher = new Watch(vm,exp, function (value, oldValue){
+             updaterFn && updaterFn(node, value, oldValue);
+        });
+
     },
     _getVmValue: function (vm,exp){
         console.log(exp);

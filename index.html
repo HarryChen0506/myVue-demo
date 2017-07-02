@@ -9,13 +9,14 @@
 <script src="js/mvvm.js"></script>
 <body>
     <div id="app">
-        <div class="blue yellow" v-class="demo">演示</div>
-        <div v-html="bla"></div>
+        <!--<div class="blue yellow" v-class="demo">演示</div>-->
+        <div class="blue yellow">{{demo}}</div>
+        <!--<div v-html="bla"></div>
         <div>{{someObj.name}}</div>
         <input type="text" v-model="someObj.name">
         <div v-if="show">显示</div>
         <div v-if="noshow">隐藏</div>
-        <div>{{someObj.name}}</div>
+        <div>{{someObj.name}}</div>-->
         <div>
             <button v-on:click="clickBtn">点击</button>
         </div>
