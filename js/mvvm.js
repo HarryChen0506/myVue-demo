@@ -92,6 +92,8 @@ Watch.prototype = {
         this.run();
     },
     run: function (){
+        //value 是当前vm的值
+        //this.value 是set改变前的值
         var value = this.get();
         var oldVal = this.value;
         if (value !== oldVal) {
@@ -151,8 +153,9 @@ Observer.prototype = {
             enumerable: true, // 可枚举
             configurable: false, // 不能再define
             get: function (){
-                // console.log('get:'+val);
+                console.log('get:'+val);
                 if(Dep.target) {
+                    console.log('dep:',Dep.target);
                     dep.depend();
                 }
                 return val;
