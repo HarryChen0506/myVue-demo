@@ -10,11 +10,11 @@
 <body>
     <div id="app">
         <!--<div class="blue yellow" v-class="demo">演示</div>-->
-        <div class="blue yellow">{{demo.age}}</div>
+        <div class="blue yellow" v-class="someStr">{{demo.age}}</div>
+         <input type="text" v-model="demo.age">
         <!--<div class="blue yellow">{{demo}}</div>-->
         <!--<div v-html="bla"></div>
-        <div>{{someObj.name}}</div>
-        <input type="text" v-model="someObj.name">
+        <div>{{someObj.name}}</div>       
         <div v-if="show">显示</div>
         <div v-if="noshow">隐藏</div>
         <div>{{someObj.name}}</div>-->
@@ -29,7 +29,7 @@
         el:'#app',
         data: {
             demo: {age:123},
-            someStr: 123,
+            someStr: 'nihao',
             someObj:{name:'harry'},
             bla: '<p>这是一段文字</p>',
             show: true,
@@ -38,7 +38,8 @@
         methods: {
             clickBtn: function(){
                 console.log('点击事件');                
-                this.demo = {age:456,hh:'aaa'};
+                // this.demo = {age:456,hh:'aaa'};
+                this.someStr = 'hello'
             }
         }
     });

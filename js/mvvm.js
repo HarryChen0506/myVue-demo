@@ -345,8 +345,9 @@ Compile.updater = {
     textUpdater: function (node,val){
         node.textContent = typeof val =='undefined'?'':val;
     },
-    classUpdater: function (node,val){
+    classUpdater: function (node,val,oldValue){
         var oldClass = node.className;
+        oldClass = oldClass.replace(oldValue,'').trim();
         space = oldClass && String(val) ? ' ':'';
         node.className = oldClass + space + val;
     },
