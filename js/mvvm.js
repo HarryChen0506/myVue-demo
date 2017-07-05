@@ -245,11 +245,9 @@ Compile.prototype = {
                 }else{
                 //指令是普通属性
                     Compile.Util[dirName] && Compile.Util[dirName](node,self.$vm,dirName,exp);
-                }
-               
+                }               
             }           
-        })
-       
+        })      
         
     },
     isElementNode: function (node){        
